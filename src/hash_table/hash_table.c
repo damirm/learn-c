@@ -5,14 +5,14 @@
 
 #include "hash_table.h"
 
-static ht_item* ht_new_item(const char* key, const char* value) {
-    ht_item* item = malloc(sizeof(ht_item));
+static ht_item_t* ht_new_item(const char* key, const char* value) {
+    ht_item_t* item = malloc(sizeof(ht_item_t));
     item->key = strdup(key);
     item->value = strdup(value);
     return item;
 }
 
-static void ht_free_item(ht_item* item) {
+static void ht_free_item(ht_item_t* item) {
     free(item->value);
     free(item->key);
     free(item);
@@ -21,17 +21,17 @@ static void ht_free_item(ht_item* item) {
 // TODO: Add item linked list length limiter.
 // In case when item linked list equals to limiter
 // hash table items array should growth up (aka rehash all items).
-ht_hash_table* ht_new() {
-    ht_hash_table* ht = malloc(sizeof(ht_hash_table));
+ht_hash_table_t* ht_new() {
+    ht_hash_table_t* ht = malloc(sizeof(ht_hash_table_t));
     ht->size = 100;
     ht->count = 0;
-    ht->items = calloc(ht->size, sizeof(ht_item*));
+    ht->items = calloc(ht->size, sizeof(ht_item_t*));
     return ht;
 }
 
-void ht_free(ht_hash_table* ht) {
+void ht_free(ht_hash_table_t* ht) {
     for(int i = 0; i < ht->size; i++) {
-        ht_item* item = ht->items[i];
+        ht_item_t* item = ht->items[i];
         if (item != NULL) {
             ht_free_item(ht->items[i]);
         }
@@ -57,9 +57,9 @@ static int ht_index(const char* s, const int buckets) {
     return ht_hash(s, 1, buckets);
 }
 
-static ht_item* ht_search_item(ht_hash_table* ht, char* key) {
+static ht_item_t* ht_search_item(ht_hash_table_t* ht, char* key) {
     int idx = ht_index(key, ht->size);
-    ht_item* item = ht->items[idx];
+    ht_item_t* item = ht->items[idx];
 
     while (item != NULL) {
         if (strcmp(item->key, key) == 0) {
@@ -71,10 +71,10 @@ static ht_item* ht_search_item(ht_hash_table* ht, char* key) {
     return item;
 }
 
-void ht_insert(ht_hash_table* ht, char* key, char* value) {
-    ht_item* item = ht_new_item(key, value);
+void ht_insert(ht_hash_table_t* ht, char* key, char* value) {
+    ht_item_t* item = ht_new_item(key, value);
     int idx = ht_index(key, ht->size);
-    ht_item* curr = ht_search_item(ht, key);
+    ht_item_t* curr = ht_search_item(ht, key);
 
     ht->count++;
 
@@ -90,7 +90,7 @@ void ht_insert(ht_hash_table* ht, char* key, char* value) {
         curr = curr->next;
     }
 
-    ht_item* next = curr->next;
+    ht_item_t* next = curr->next;
     item->next = next->next;
     item->prev = curr;
     curr->next = item;
@@ -98,8 +98,8 @@ void ht_insert(ht_hash_table* ht, char* key, char* value) {
     ht_free_item(next);
 }
 
-void ht_delete(ht_hash_table* ht, char* key) {
-    ht_item* item = ht_search_item(ht, key);
+void ht_delete(ht_hash_table_t* ht, char* key) {
+    ht_item_t* item = ht_search_item(ht, key);
     if (item == NULL) {
         return;
     }
@@ -112,8 +112,8 @@ void ht_delete(ht_hash_table* ht, char* key) {
     ht->count--;
 }
 
-char* ht_search(ht_hash_table* ht, char* key) {
-    ht_item* item = ht_search_item(ht, key);
+char* ht_search(ht_hash_table_t* ht, char* key) {
+    ht_item_t* item = ht_search_item(ht, key);
     if (item != NULL) {
         return item->value;
     }
